@@ -1,4 +1,3 @@
-
 // Fully converted Uplink Core web app
 import React, { useState, useEffect } from 'react';
 
@@ -25,7 +24,16 @@ function App() {
   };
 
   const handleSubmit = () => {
-    const newEntry = { name: submittedName, reward, promo, business, donation, amount, timestamp: new Date().toISOString() };
+    if (!submittedName) return;
+    const newEntry = {
+      name: submittedName,
+      reward,
+      promo,
+      business,
+      donation,
+      amount,
+      timestamp: new Date().toISOString()
+    };
     const updated = [...entries, newEntry];
     setEntries(updated);
     localStorage.setItem('entries', JSON.stringify(updated));
@@ -50,7 +58,12 @@ function App() {
     <div style={styles.container}>
       <div style={styles.card}>
         <h2>Welcome to Uplink Core</h2>
-        <input style={styles.input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter name" />
+        <input
+          style={styles.input}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter name"
+        />
         <button style={styles.button} onClick={() => {
           setSubmittedName(name);
           if (!userList.includes(name)) {
@@ -68,7 +81,12 @@ function App() {
           ))}
         </div>
       )}
-      <button style={{ ...styles.button, backgroundColor: '#FF3B30' }} onClick={handleClearAll}>Clear All Users & Data</button>
+      <button
+        style={{ ...styles.button, backgroundColor: '#FF3B30' }}
+        onClick={handleClearAll}
+      >
+        Clear All Users & Data
+      </button>
     </div>
   );
 
@@ -90,9 +108,17 @@ function App() {
         ))}
       <div style={styles.card}>
         <label>Amount ($):</label>
-        <input style={styles.input} value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" type="number" />
+        <input
+          style={styles.input}
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="0.00"
+          type="number"
+        />
       </div>
-      <button style={styles.button} onClick={handleSubmit}>Submit</button>
+      <button style={styles.button} onClick={handleSubmit} disabled={!submittedName}>
+        Submit
+      </button>
     </div>
   );
 
@@ -105,6 +131,10 @@ function App() {
       const success = filtered.filter(e => ['Yes', 'Already Had', ...(key === 'business' ? ['N/A'] : [])].includes(e[key]));
       return filtered.length ? ((success.length / filtered.length) * 100).toFixed(1) + '%' : '0%';
     };
+
+    if (!submittedName) {
+      return <div style={styles.container}><p>Please enter a name to view stats.</p></div>;
+    }
 
     return (
       <div style={styles.container}>
@@ -134,15 +164,22 @@ function App() {
           <p>Amount: $${e.amount}</p>
           <p>Time: ${e.timestamp}</p>
         </div>`).join('') + '</body></html>';
-      const newWin = window.open();
-      newWin.document.write(html);
-      newWin.print();
-      newWin.close();
+
+      const newWin = window.open('', '_blank');
+      if (newWin) {
+        newWin.document.write(html);
+        newWin.document.close();
+        newWin.print();
+      } else {
+        alert('Popup blocked. Please allow popups to export.');
+      }
     };
 
     return (
       <div style={styles.container}>
-        <button style={styles.button} onClick={exportPDF}>Export Today's Entries to PDF</button>
+        <button style={styles.button} onClick={exportPDF}>
+          Export Today's Entries to PDF
+        </button>
         {entries.map((item, index) => (
           <div key={index} style={styles.card}>
             <p>Rewards: {item.reward}</p>
@@ -150,7 +187,12 @@ function App() {
             <p>Biz: {item.business}</p>
             <p>Donation: ${item.donation}</p>
             <p>Amount: ${item.amount}</p>
-            <button style={{ ...styles.button, backgroundColor: '#FF3B30' }} onClick={() => handleDeleteEntry(index)}>Delete</button>
+            <button
+              style={{ ...styles.button, backgroundColor: '#FF3B30' }}
+              onClick={() => handleDeleteEntry(index)}
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
@@ -161,7 +203,7 @@ function App() {
     home: <HomeScreen />,
     entry: <EntryScreen />,
     stats: <StatsScreen />,
-    history: <HistoryScreen />,
+    history: <HistoryScreen />
   };
 
   const [screen, setScreen] = useState('home');
@@ -170,10 +212,12 @@ function App() {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-around', padding: '10px', background: '#eee' }}>
         {['home', 'entry', 'stats', 'history'].map(key => (
-          <button key={key} onClick={() => setScreen(key)}>{key.charAt(0).toUpperCase() + key.slice(1)}</button>
+          <button key={key} onClick={() => setScreen(key)}>
+            {key.charAt(0).toUpperCase() + key.slice(1)}
+          </button>
         ))}
       </div>
-      {screenMap[screen]}
+      {screenMap[screen] || <HomeScreen />}
     </div>
   );
 }
